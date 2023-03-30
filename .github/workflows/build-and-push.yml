@@ -16,9 +16,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: "buildah-build"
+      - name: debug
+        run: ls
       - name: Install latest buildah
         run: |
-          bash ls -l; ls -la buildah-build;
+          pwd; ls -l; ls -la buildah-build;
           bash buildah-build/.github/install_latest_buildah.sh
       - name: Install qemu dependency
         run: |
