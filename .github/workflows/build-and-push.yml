@@ -18,7 +18,7 @@ jobs:
           path: "buildah-build"
       - name: Install latest buildah
         run: |
-          bash pwd; ls -l; ls -la buildah-build;
+          bash ls -l; ls -la buildah-build;
           bash buildah-build/.github/install_latest_buildah.sh
       - name: Install qemu dependency
         run: |
