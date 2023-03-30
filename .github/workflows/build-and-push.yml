@@ -20,7 +20,10 @@ jobs:
         run: ls
       - name: Install latest buildah
         run: |
-          pwd; ls -l; ls -la buildah-build;
+          pwd
+          ls -l
+          ls -la buildah-build
+          ls -la buildah-build/.github
           bash buildah-build/.github/install_latest_buildah.sh
       - name: Install qemu dependency
         run: |
