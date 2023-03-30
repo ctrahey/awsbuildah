@@ -12,29 +12,15 @@ jobs:
       IMAGE_NAME: awsbuildah-multiplatform
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout Buildah action
+      - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          path: "buildah-build"
-      - name: Install latest buildah
-        run: |
-          pwd
-          echo "top dir"
-          ls -l
-          echo "buildah-build dir:"
-          ls -la buildah-build/
-          echo "buildah-build/.github dir:"
-          ls -la buildah-build/.github/
-          echo "buildah-build/.github all sub dirs:"
-          ls -la buildah-build/.github/*
-          bash buildah-build/.github/install_latest_buildah.sh
       - name: Install qemu dependency
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
       - name: Build Image
         id: build_image_multiplatform
-        uses: ./buildah-build/
+        uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.IMAGE_TAG }}
