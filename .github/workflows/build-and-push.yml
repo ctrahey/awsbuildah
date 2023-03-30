@@ -1,7 +1,6 @@
 name: Multiarch build
 on:
   push:
-  pull_request:
 
 env:
   IMAGE_TAG: latest
@@ -19,6 +18,7 @@ jobs:
           path: "buildah-build"
       - name: Install latest buildah
         run: |
+          bash pwd; ls -l; ls -la buildah-build;
           bash buildah-build/.github/install_latest_buildah.sh
       - name: Install qemu dependency
         run: |
