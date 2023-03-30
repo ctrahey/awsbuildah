@@ -25,6 +25,8 @@ jobs:
           ls -la buildah-build/
           echo "buildah-build/.github dir:"
           ls -la buildah-build/.github/
+          echo "buildah-build/.github all sub dirs:"
+          ls -la buildah-build/.github/*
           bash buildah-build/.github/install_latest_buildah.sh
       - name: Install qemu dependency
         run: |
