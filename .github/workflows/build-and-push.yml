@@ -28,7 +28,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.IMAGE_TAG }}
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           containerfiles: |
             ./Dockerfile
       - name: Echo Outputs
@@ -39,7 +39,6 @@ jobs:
       - name: Check images created
         run: buildah images | grep '${{ env.IMAGE_NAME }}'
       - name: Check manifest
-        if: ${{ false }}
         run: |
           set -x
           buildah manifest inspect ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
