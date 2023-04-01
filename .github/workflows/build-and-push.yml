@@ -56,7 +56,7 @@ jobs:
         uses: actions/cache@v3
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.layercache/
+          path: /var/lib/containers/storage
           key: ${{ runner.os }}-build-layers-cache
       - name: Build Image
         id: build_image
@@ -68,14 +68,6 @@ jobs:
           layers: true
           containerfiles: |
             ./Dockerfile
-          extra-args: |
-            --cache-from ~/.layercache
-            --cache-to ~/.newlayercache
-      - name: Swap Cache
-        id: swap-cache
-        run: |
-          rm -rf ~/.layercache
-          mv ~/.newlayercache ~/.layercache
       - name: Echo Outputs
         run: |
           echo "Image: ${{ steps.build_image.outputs.image }}"
@@ -89,7 +81,7 @@ jobs:
           buildah manifest inspect ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
       - name: Run image
         run: |
-          podman run --rm localhost/${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
+          podman run --rm ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
       - name: Push To ghcr
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
