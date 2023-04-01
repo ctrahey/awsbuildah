@@ -18,6 +18,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: configure-storage
+        id: config-storage
+        run: |
+          cat <<EOF > ~/.config/containers/storage.conf
+          [storage]
+          # Default Storage Driver, Must be set for proper operation.
+          driver = "overlay"
+          graphroot = "$HOME/.local/share/containers/storage"
+          EOF
       - name: Cache Buildah
         id: cache-buildah
         uses: actions/cache@v3
@@ -69,9 +78,6 @@ jobs:
           layers: true
           containerfiles: |
             ./Dockerfile
-          extra-args: |
-            --storage-driver overlay
-            --root ~/.local/share/containers/storage/
       - name: Echo Outputs
         run: |
           echo "Image: ${{ steps.build_image.outputs.image }}"
@@ -98,7 +104,4 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
-          extra-args: |
-            --storage-driver overlay
-            --root ~/.local/share/containers/storage/
           
