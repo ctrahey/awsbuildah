@@ -21,6 +21,7 @@ jobs:
       - name: configure-storage
         id: config-storage
         run: |
+          mkdir -p ~/.config/containers
           cat <<EOF > ~/.config/containers/storage.conf
           [storage]
           # Default Storage Driver, Must be set for proper operation.
