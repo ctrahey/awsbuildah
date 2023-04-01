@@ -18,22 +18,40 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Cache Buildah
+        id: cache-buildah
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/bin/buildah
+          key: ${{ runner.os }}-build-buildah-binary
       - name: Install qemu dependency
         run: |
           sudo apt-get -y -qq update
+          sudo apt-get install -y qemu-user-static
+          BUILDAH_VERSION=$(curl --silent "https://api.github.com/repos/containers/buildah/releases/latest" | grep -i "tag_name" | sed -E 's/.*"v([^"]+)".*/\1/')
+          if buildah --version | grep -q $BUILDAH_VERSION; then
+              echo "Buildah version already matches latest release, exiting this step as success"
+              exit 0
+          fi
           sudo apt-get -y install bats btrfs-progs git libapparmor-dev libdevmapper-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev skopeo go-md2man make
           sudo apt-get -y install golang-1.18
-          sudo apt-get install -y qemu-user-static
           mkdir ~/buildah
           cd ~/buildah
           export GOPATH=`pwd`
-          git clone https://github.com/containers/buildah ./src/github.com/containers/buildah
+          git clone -b v${BUILDAH_VERSION} https://github.com/containers/buildah ./src/github.com/containers/buildah
           cd ./src/github.com/containers/buildah
           PATH=/usr/lib/go-1.18/bin:$PATH make runc all SECURITYTAGS="apparmor seccomp"
           sudo make install install.runc
           which buildah
           buildah --version
           buildah --help
+      - name: Cache image layers
+        id: cache-layers
+        uses: actions/cache@v3
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.layercache/
+          key: ${{ runner.os }}-build-layers-cache
       - name: Build Image
         id: build_image
         uses: redhat-actions/buildah-build@v2
@@ -44,6 +62,14 @@ jobs:
           layers: true
           containerfiles: |
             ./Dockerfile
+          extra-args: |
+            --cache-from ~/.layercache
+            --cache-to ~/.newlayercache
+      - name: Swap Cache
+        id: swap-cache
+        run: |
+          rm -rf ~/.layercache
+          mv ~/.newlayercache ~/.layercache
       - name: Echo Outputs
         run: |
           echo "Image: ${{ steps.build_image.outputs.image }}"
