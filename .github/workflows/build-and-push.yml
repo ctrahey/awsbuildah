@@ -57,7 +57,7 @@ jobs:
           buildah manifest inspect ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
       - name: Run image
         run: |
-          podman run --rm ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
+          podman run --rm localhost/${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
       - name: Push To ghcr
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
