@@ -24,6 +24,12 @@ jobs:
         with:
           path: /usr/local/bin/buildah
           key: ${{ runner.os }}-build-buildah-binary
+      - name: Cache runc
+        id: cache-runc
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/bin/runc
+          key: ${{ runner.os }}-build-runc-binary
       - name: Install qemu dependency
         run: |
           sudo apt-get -y -qq update
