@@ -32,6 +32,7 @@ jobs:
           key: ${{ runner.os }}-build-runc-binary
       - name: Install qemu dependency
         run: |
+          cat /etc/containers/storage.conf
           sudo apt-get -y -qq update
           sudo apt-get install -y qemu-user-static
           BUILDAH_VERSION=$(curl --silent "https://api.github.com/repos/containers/buildah/releases/latest" | grep -i "tag_name" | sed -E 's/.*"v([^"]+)".*/\1/')
@@ -51,12 +52,13 @@ jobs:
           which buildah
           buildah --version
           buildah --help
+          ls -l /usr/local/bin/buildah
       - name: Cache image layers
         id: cache-layers
         uses: actions/cache@v3
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: /var/lib/containers/storage
+          path: ~/.local/share/containers/storage/
           key: ${{ runner.os }}-build-layers-cache
       - name: Build Image
         id: build_image
@@ -68,6 +70,9 @@ jobs:
           layers: true
           containerfiles: |
             ./Dockerfile
+          extra-args: |
+            --storage-driver overlay
+            --root ~/.local/share/containers/storage/
       - name: Echo Outputs
         run: |
           echo "Image: ${{ steps.build_image.outputs.image }}"
@@ -81,10 +86,11 @@ jobs:
           buildah manifest inspect ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
       - name: Run image
         run: |
+          ls -l /var/lib/containers/storage
           buildah images
           echo now showing podman images
           podman images ls
-          
+          podman run --rm ${{ steps.build_image.outputs.image }}:${{ env.IMAGE_TAG }}
       - name: Push To ghcr
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -94,3 +100,7 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
+          extra-args: |
+            --storage-driver overlay
+            --root ~/.local/share/containers/storage/
+          
